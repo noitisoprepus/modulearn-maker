@@ -5,43 +5,9 @@ import zipfile
 import shutil
 import customtkinter
 from tkinter import filedialog, messagebox
-import tkinter.ttk as ttk
 
-class SidebarFrame(customtkinter.CTkFrame):
-    def __init__(self, master):
-        super().__init__(master)
-
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1)
-
-        self.label = customtkinter.CTkLabel(self, text="Modules")
-        self.label.grid(row=0, column=0, sticky="ew")
-
-        self.module_tree = ttk.Treeview(self)
-        self.module_tree.grid(row=1, column=0, sticky="nsew")
-
-    def load_modules(self, modules):
-        self.module_tree.delete(*self.module_tree.get_children())
-        for i, module in enumerate(modules):
-            module_id = self.module_tree.insert("", "end", text=module["title"], open=True)
-            for topic in module.get("topics", []):
-                self.module_tree.insert(module_id ,"end", text=topic["title"])
-
-    def get(self):
-        pass
-
-class MainFrame(customtkinter.CTkFrame):
-    def __init__(self, master):
-        super().__init__(master)
-
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1)
-
-        self.label = customtkinter.CTkLabel(self, text="Module Editor")
-        self.label.grid(row=0, column=0, sticky="ew")
-    
-    def get(self):
-        pass
+from ui.sidebar import SidebarFrame
+from ui.main_frame import MainFrame
 
 class App(customtkinter.CTk):
     def __init__(self):
@@ -64,14 +30,14 @@ class App(customtkinter.CTk):
         self.button_save = customtkinter.CTkButton(self, text="Save", width=32, command=self.save_file)
         self.button_save.grid(row=0, column=2, padx=2, pady=10)
 
-        # Left and right main layout
-        self.sidebar_frame = SidebarFrame(self)
+        # Layout frames
+        self.sidebar_frame = SidebarFrame(self, self)
         self.sidebar_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nswe", columnspan=3)
 
-        self.main_frame = MainFrame(self)
-        self.main_frame.grid(row=1, column=4, padx=10, pady=10, sticky="nswe", columnspan=1)
+        self.main_frame = MainFrame(self, self)
+        self.main_frame.grid(row=1, column=4, padx=10, pady=10, sticky="nswe")
 
-        self.temp_dir = None
+        self.temp_dir = tempfile.mkdtemp(prefix="modulearn-maker_")
         self.media_dir = None
 
     def on_close(self):
@@ -81,10 +47,10 @@ class App(customtkinter.CTk):
 
     def new_file(self):
         """Start a new module session."""
+        self.cleanup_temp_dir()
+        self.temp_dir = tempfile.mkdtemp(prefix="modulearn-maker_")
         self.modules = []
         self.sidebar_frame.load_modules(self.modules)
-
-        self.cleanup_temp_dir()
         messagebox.showinfo("Info", "New module set created.")
 
     def open_file(self):
@@ -101,10 +67,10 @@ class App(customtkinter.CTk):
                 zip_ref.extractall(self.temp_dir)
 
             # Load all JSON files in the root as modules
-            module_files = [
+            module_files = sorted([
                 f for f in os.listdir(self.temp_dir)
                 if f.endswith('.json') and os.path.isfile(os.path.join(self.temp_dir, f))
-            ]
+            ], key=lambda f: int(f.split("_")[1].split(".")[0]))
 
             self.modules = []
             for file in module_files:
@@ -112,7 +78,7 @@ class App(customtkinter.CTk):
                     data = json.load(f)
                     self.modules.append(data)
 
-            # Handle optional media directory
+            # Handle media directory
             media_path = os.path.join(self.temp_dir, "media")
             if os.path.exists(media_path) and os.path.isdir(media_path):
                 self.media_dir = media_path
@@ -133,7 +99,7 @@ class App(customtkinter.CTk):
 
         try:
             # Ensure temp_dir exists
-            if not hasattr(self, "temp_dir") or not os.path.exists(self.temp_dir):
+            if not os.path.exists(self.temp_dir):
                 messagebox.showerror("Error", "No modules data initialized.")
                 return
 
@@ -144,9 +110,7 @@ class App(customtkinter.CTk):
 
             # Write updated module JSON files
             for i, module in enumerate(self.modules):
-                module_title = module.get("title", f"module_{i}")
-                safe_title = "".join(c for c in module_title if c.isalnum() or c in (" ", "_", ",")).strip()
-                filename = f"{safe_title}.json"
+                filename = f"module_{i}.json"
                 with open(os.path.join(self.temp_dir, filename), "w", encoding="utf-8") as f:
                     json.dump(module, f, indent=2, ensure_ascii=True)
 
@@ -174,5 +138,6 @@ class App(customtkinter.CTk):
             finally:
                 self.temp_dir = None
 
-app = App()
-app.mainloop()
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()
