@@ -3,7 +3,7 @@ import re
 import shutil
 import customtkinter
 from tkinter import StringVar, filedialog
-from PIL import Image, ImageTk
+from PIL import Image
 
 class SectionEditorFrame(customtkinter.CTkFrame):
     """Frame to edit a specific section depending on its type."""
@@ -123,6 +123,10 @@ class SectionListFrame(customtkinter.CTkScrollableFrame):
         self.app = app
         self.section_list = section_list
         self.on_update = on_update or (lambda: None)
+
+        # Manually bind mouse scroll wheel events (For Linux)
+        self.bind("<Button-4>", lambda: self._parent_canvas.yview("scroll", -1, "units"))
+        self.bind("<Button-5>", lambda: self._parent_canvas.yview("scroll", 1, "units"))
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
