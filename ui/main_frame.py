@@ -8,9 +8,9 @@ class MainFrame(customtkinter.CTkFrame):
         self.app = app
 
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(2, weight=1)
+        self.grid_rowconfigure(4, weight=1)
 
-        self.label = customtkinter.CTkLabel(self, text="Module Editor")
+        self.label = customtkinter.CTkLabel(self, text="Editor")
         self.label.grid(row=0, column=0, columnspan=2, sticky="ew")
 
         self.placeholder = customtkinter.CTkLabel(self, text="")
@@ -24,16 +24,47 @@ class MainFrame(customtkinter.CTkFrame):
 
     def show_add_topic(self, module_index):
         self.clear()
+
+        # Module Title
+        name_var = StringVar(value=self.app.modules[module_index]["title"])
+        name_entry = customtkinter.CTkEntry(self, textvariable=name_var)
+        name_entry.grid(row=1, column=0, sticky="ew", padx=4)
+
+        info_label = customtkinter.CTkLabel(self, text="Press Enter to apply changes to the module title", font=("Arial", 10), text_color="gray")
+        info_label.grid(row=2, column=0, sticky="w", padx=4)
+        
+        def update_name():
+            self.app.modules[module_index]["title"] = name_var.get()
+            self.app.sidebar_frame.load_modules(self.app.modules)
+
+        name_entry.bind("<Return>", lambda _: update_name())
+
         def add_topic():
             module = self.app.modules[module_index]
             module.setdefault("topics", []).append({"title": f"Topic {len(module['topics'])}", "sections": []})
             self.app.sidebar_frame.load_modules(self.app.modules)
 
         btn = customtkinter.CTkButton(self, text="Add Topic", command=add_topic)
-        btn.grid(row=1, column=0, padx=10, pady=10, sticky="n")
+        btn.grid(row=3, column=0, pady=4, sticky="n")
 
     def show_add_section(self, module_index, topic_index):
         self.clear()
+
+        # Topic Title
+        name_var = StringVar(value=self.app.modules[module_index]["topics"][topic_index]["title"])
+        name_entry = customtkinter.CTkEntry(self, textvariable=name_var)
+        name_entry.grid(row=1, column=0, sticky="ew", padx=4)
+
+        info_label = customtkinter.CTkLabel(self, text="Press Enter to apply changes to the topic title", font=("Arial", 10), text_color="gray")
+        info_label.grid(row=2, column=0, sticky="w", padx=4)
+        
+        def update_name():
+            self.app.modules[module_index]["topics"][topic_index]["title"] = name_var.get()
+            self.app.sidebar_frame.load_modules(self.app.modules)
+
+        name_entry.bind("<Return>", lambda _: update_name())
+
+        # Section Selection
         section_type = StringVar(value="text")
 
         module = self.app.modules[module_index]
@@ -57,7 +88,7 @@ class MainFrame(customtkinter.CTkFrame):
 
         # Create a sub-frame to center dropdown and button
         button_row = customtkinter.CTkFrame(self, fg_color="transparent")
-        button_row.grid(row=1, column=0, columnspan=2, pady=10)
+        button_row.grid(row=3, column=0, columnspan=2, pady=4)
 
         button_row.grid_columnconfigure(0, weight=1)
         button_row.grid_columnconfigure(1, weight=1)
@@ -65,12 +96,12 @@ class MainFrame(customtkinter.CTkFrame):
 
         # Centered widgets
         dropdown = customtkinter.CTkOptionMenu(button_row, values=types, variable=section_type)
-        dropdown.grid(row=0, column=0, padx=10)
+        dropdown.grid(row=0, column=0, padx=8)
 
         btn = customtkinter.CTkButton(button_row, text="Add Section", command=add_section)
-        btn.grid(row=0, column=1, padx=10)
+        btn.grid(row=0, column=1, padx=8)
 
         # Render frame for showing list of sections
         section_frame = SectionListFrame(self, section_list, self.app)
-        section_frame.grid(row=2, column=0, padx=10, pady=10, columnspan=2, sticky="nsew")
+        section_frame.grid(row=4, column=0, padx=10, pady=10, columnspan=2, sticky="nsew")
 
