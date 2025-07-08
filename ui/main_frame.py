@@ -8,8 +8,7 @@ class MainFrame(customtkinter.CTkFrame):
         self.app = app
 
         self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=2)
-        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=1)
 
         self.label = customtkinter.CTkLabel(self, text="Module Editor")
         self.label.grid(row=0, column=0, columnspan=2, sticky="ew")
@@ -55,11 +54,23 @@ class MainFrame(customtkinter.CTkFrame):
             self.show_add_section(module_index, topic_index)
 
         types = ["text", "image", "trivia", "remember", "active-recall"]
-        dropdown = customtkinter.CTkOptionMenu(self, values=types, variable=section_type)
-        dropdown.grid(row=1, column=0, padx=10, pady=5)
 
-        btn = customtkinter.CTkButton(self, text="Add Section", command=add_section)
-        btn.grid(row=2, column=0, padx=10, pady=5)
+        # Create a sub-frame to center dropdown and button
+        button_row = customtkinter.CTkFrame(self, fg_color="transparent")
+        button_row.grid(row=1, column=0, columnspan=2, pady=10)
 
+        button_row.grid_columnconfigure(0, weight=1)
+        button_row.grid_columnconfigure(1, weight=1)
+        button_row.grid_columnconfigure(2, weight=1)
+
+        # Centered widgets
+        dropdown = customtkinter.CTkOptionMenu(button_row, values=types, variable=section_type)
+        dropdown.grid(row=0, column=0, padx=10)
+
+        btn = customtkinter.CTkButton(button_row, text="Add Section", command=add_section)
+        btn.grid(row=0, column=1, padx=10)
+
+        # Render frame for showing list of sections
         section_frame = SectionListFrame(self, section_list, self.app)
-        section_frame.grid(row=1, column=1, padx=10, pady=10, rowspan=3, sticky="nsew")
+        section_frame.grid(row=2, column=0, padx=10, pady=10, columnspan=2, sticky="nsew")
+
