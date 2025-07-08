@@ -22,20 +22,23 @@ class App(customtkinter.CTk):
 
         self.modules = []
 
+        # Top control buttons container
+        top_controls = customtkinter.CTkFrame(self, fg_color="transparent")
+        top_controls.grid(row=0, column=0, columnspan=3, sticky="w", padx=10, pady=(10, 0))
+
         # Top control buttons
-        self.button_new = customtkinter.CTkButton(self, text="New", width=32, command=self.new_file)
-        self.button_new.grid(row=0, column=0, padx=2, pady=2)
-        self.button_open = customtkinter.CTkButton(self, text="Open", width=32, command=self.open_file)
-        self.button_open.grid(row=0, column=1, padx=2, pady=10)
-        self.button_save = customtkinter.CTkButton(self, text="Save", width=32, command=self.save_file)
-        self.button_save.grid(row=0, column=2, padx=2, pady=10)
+        self.button_new = customtkinter.CTkButton(top_controls, text="New", width=48, command=self.new_file)
+        self.button_new.pack(side="left", padx=(0, 4))
+        self.button_open = customtkinter.CTkButton(top_controls, text="Open", width=48, command=self.open_file)
+        self.button_open.pack(side="left", padx=(0, 4))
+        self.button_save = customtkinter.CTkButton(top_controls, text="Save", width=48, command=self.save_file)
+        self.button_save.pack(side="left")
 
         # Layout frames
         self.sidebar_frame = SidebarFrame(self, self)
-        self.sidebar_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nswe", columnspan=3)
-
+        self.sidebar_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew", columnspan=3)
         self.main_frame = MainFrame(self, self)
-        self.main_frame.grid(row=1, column=4, padx=10, pady=10, sticky="nswe")
+        self.main_frame.grid(row=1, column=4, padx=10, pady=10, sticky="nsew")
 
         self.temp_dir = tempfile.mkdtemp(prefix="modulearn-maker_")
         self.media_dir = None
