@@ -1,6 +1,7 @@
 import customtkinter
 from tkinter import StringVar
 from ui.section_editor import SectionListFrame
+from PIL import Image
 
 class MainFrame(customtkinter.CTkFrame):
     def __init__(self, master, app):
@@ -22,7 +23,7 @@ class MainFrame(customtkinter.CTkFrame):
             if child not in [self.label, self.placeholder]:
                 child.destroy()
 
-    def show_add_topic(self, module_index):
+    def show_module_editor(self, module_index):
         self.clear()
 
         # Module Title
@@ -35,19 +36,37 @@ class MainFrame(customtkinter.CTkFrame):
         
         def update_name():
             self.app.modules[module_index]["title"] = name_var.get()
-            self.app.sidebar_frame.load_modules(self.app.modules)
+            self.app.load_modules(self.app.modules)
 
         name_entry.bind("<Return>", lambda _: update_name())
 
-        def add_topic():
-            module = self.app.modules[module_index]
-            module.setdefault("topics", []).append({"title": f"Topic {len(module['topics'])}", "sections": []})
-            self.app.sidebar_frame.load_modules(self.app.modules)
+        def delete_button_pressed():
+            self.app.delete_module(module_index)
+            self.clear()
+        
+        # Delete Button
+        delete_image = customtkinter.CTkImage(light_image=Image.open("assets/icon_delete.png"))
+        delete_button = customtkinter.CTkButton(
+            self, 
+            image=delete_image, 
+            text="", 
+            command=delete_button_pressed, 
+            width=20, 
+            fg_color="white", 
+            hover_color="gray", 
+            border_color="gray", 
+            border_width=2
+        )
+        delete_button.grid(row=1, column=1, padx=(0, 4))
 
-        btn = customtkinter.CTkButton(self, text="Add Topic", command=add_topic)
-        btn.grid(row=3, column=0, pady=4, sticky="n")
+        def add_topic_button_pressed():
+            self.app.add_topic(module_index)
 
-    def show_add_section(self, module_index, topic_index):
+        # Add Topic Button
+        add_topic_button = customtkinter.CTkButton(self, text="Add Topic", command=add_topic_button_pressed)
+        add_topic_button.grid(row=3, column=0, pady=4, sticky="n")
+
+    def show_topic_editor(self, module_index, topic_index):
         self.clear()
 
         # Topic Title
@@ -60,9 +79,28 @@ class MainFrame(customtkinter.CTkFrame):
         
         def update_name():
             self.app.modules[module_index]["topics"][topic_index]["title"] = name_var.get()
-            self.app.sidebar_frame.load_modules(self.app.modules)
+            self.app.load_modules(self.app.modules)
 
         name_entry.bind("<Return>", lambda _: update_name())
+
+        def delete_button_pressed():
+            self.app.delete_topic(module_index, topic_index)
+            self.show_module_editor(module_index=module_index)
+        
+        # Delete Button
+        delete_image = customtkinter.CTkImage(light_image=Image.open("assets/icon_delete.png"))
+        delete_button = customtkinter.CTkButton(
+            self, 
+            image=delete_image, 
+            text="", 
+            command=delete_button_pressed, 
+            width=20, 
+            fg_color="white", 
+            hover_color="gray", 
+            border_color="gray", 
+            border_width=2
+        )
+        delete_button.grid(row=1, column=1, padx=(0, 4))
 
         # Section Selection
         section_type = StringVar(value="text")
@@ -82,7 +120,11 @@ class MainFrame(customtkinter.CTkFrame):
                 section_data.update({"content": ""})
 
             section_list.append(section_data)
-            self.show_add_section(module_index, topic_index)
+            self.show_topic_editor(module_index, topic_index)
+
+        def delete_section(index):
+            del section_list[index]
+            self.show_topic_editor(module_index, topic_index)
 
         types = ["text", "image", "trivia", "remember", "active-recall"]
 
@@ -102,6 +144,6 @@ class MainFrame(customtkinter.CTkFrame):
         btn.grid(row=0, column=1, padx=8)
 
         # Render frame for showing list of sections
-        section_frame = SectionListFrame(self, section_list, self.app)
+        section_frame = SectionListFrame(self, section_list, self.app, on_delete=delete_section)
         section_frame.grid(row=4, column=0, padx=10, pady=10, columnspan=2, sticky="nsew")
 

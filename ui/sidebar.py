@@ -12,7 +12,7 @@ class SidebarFrame(customtkinter.CTkFrame):
         self.label = customtkinter.CTkLabel(self, text="Modules")
         self.label.grid(row=0, column=0, sticky="ew")
 
-        self.add_button = customtkinter.CTkButton(self, text="Add Module", command=self.add_module)
+        self.add_button = customtkinter.CTkButton(self, text="Add Module", command=self.app.add_module)
         self.add_button.grid(row=1, column=0, pady=(0, 8))
 
         # Subframe for treeview
@@ -31,26 +31,14 @@ class SidebarFrame(customtkinter.CTkFrame):
         scrollbar.grid(row=0, column=1, sticky="ns")
         self.module_tree.configure(yscrollcommand=scrollbar.set)
 
-    def load_modules(self, modules):
-        self.module_tree.delete(*self.module_tree.get_children())
-        for i, module in enumerate(modules):
-            module_id = self.module_tree.insert("", "end", text=module["title"], open=True)
-            for topic in module.get("topics", []):
-                self.module_tree.insert(module_id, "end", text=topic["title"])
-
-    def add_module(self):
-        new_module = {"title": f"Untitled Module {len(self.app.modules)}", "topics": []}
-        self.app.modules.append(new_module)
-        self.load_modules(self.app.modules)
-
     def on_select(self, event):
         item = self.module_tree.focus()
         parent = self.module_tree.parent(item)
 
         if not parent:
             index = self.module_tree.index(item)
-            self.app.main_frame.show_add_topic(index)
+            self.app.main_frame.show_module_editor(index)
         else:
             module_index = self.module_tree.index(parent)
             topic_index = self.module_tree.index(item)
-            self.app.main_frame.show_add_section(module_index, topic_index)
+            self.app.main_frame.show_topic_editor(module_index, topic_index)

@@ -53,7 +53,7 @@ class App(customtkinter.CTk):
         self.cleanup_temp_dir()
         self.temp_dir = tempfile.mkdtemp(prefix="modulearn-maker_")
         self.modules = []
-        self.sidebar_frame.load_modules(self.modules)
+        self.load_modules(self.modules)
         messagebox.showinfo("Info", "New module set created.")
 
     def open_file(self):
@@ -88,7 +88,7 @@ class App(customtkinter.CTk):
             else:
                 self.media_dir = None
 
-            self.sidebar_frame.load_modules(self.modules)
+            self.load_modules(self.modules)
             messagebox.showinfo("Success", f"Loaded {len(self.modules)} modules.")
 
         except Exception as e:
@@ -140,6 +140,31 @@ class App(customtkinter.CTk):
                 print(f"Error cleaning temp dir: {e}")
             finally:
                 self.temp_dir = None
+    
+    def load_modules(self, modules):
+        self.sidebar_frame.module_tree.delete(*self.sidebar_frame.module_tree.get_children())
+        for i, module in enumerate(modules):
+            module_id = self.sidebar_frame.module_tree.insert("", "end", text=module["title"], open=True)
+            for topic in module.get("topics", []):
+                self.sidebar_frame.module_tree.insert(module_id, "end", text=topic["title"])
+
+    def add_module(self):
+        new_module = {"title": f"Untitled Module {len(self.modules)}", "topics": []}
+        self.modules.append(new_module)
+        self.load_modules(self.modules)
+
+    def delete_module(self, module_index):
+            del self.modules[module_index]
+            self.load_modules(self.modules)
+    
+    def add_topic(self, module_index):
+            module = self.modules[module_index]
+            module.setdefault("topics", []).append({"title": f"Topic {len(module['topics'])}", "sections": []})
+            self.load_modules(self.modules)
+
+    def delete_topic(self, module_index, topic_index):
+        del self.modules[module_index]["topics"][topic_index]
+        self.load_modules(self.modules)
 
 if __name__ == "__main__":
     app = App()

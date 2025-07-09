@@ -20,14 +20,14 @@ class SectionEditorFrame(customtkinter.CTkFrame):
         for widget in self.winfo_children():
             widget.destroy()
 
-        st = self.section_data.get("type", "content")
-        if st == "text":
+        section_type = self.section_data.get("type", "content")
+        if section_type == "text":
             self.build_text_editor("Content", 300)
-        elif st == "image":
+        elif section_type == "image":
             self.build_image_editor()
-        elif st in ("trivia", "remember"):
-            self.build_text_editor(st.capitalize(), 150)
-        elif st == "active-recall":
+        elif section_type in ("trivia", "remember"):
+            self.build_text_editor(section_type.capitalize(), 150)
+        elif section_type == "active-recall":
             self.build_qna_editor()
         else:
             self.build_text_editor("Unknown", 0)
@@ -129,11 +129,12 @@ class SectionEditorFrame(customtkinter.CTkFrame):
 
 class SectionListFrame(customtkinter.CTkScrollableFrame):
     """Scrollable container of SectionEditorFrames"""
-    def __init__(self, master, section_list, app, on_update=None):
+    def __init__(self, master, section_list, app, on_update=None, on_delete=None):
         super().__init__(master)
         self.app = app
         self.section_list = section_list
         self.on_update = on_update or (lambda: None)
+        self.on_delete = on_delete or (lambda index: None)
 
         # Manually bind mouse scroll wheel events (For Linux)
         self.bind("<Button-4>", lambda _: self._parent_canvas.yview("scroll", -1, "units"))
@@ -148,5 +149,21 @@ class SectionListFrame(customtkinter.CTkScrollableFrame):
             w.destroy()
 
         for i, section in enumerate(self.section_list):
+            # Editor Fields
             editor = SectionEditorFrame(self, section, self.app, on_update=self.on_update)
-            editor.grid(row=i, column=0, sticky="ew", pady=8, padx=16)
+            editor.grid(row=i, column=0, sticky="ew", pady=(4, 0), padx=16)
+
+            # Delete Buttons
+            delete_image = customtkinter.CTkImage(light_image=Image.open("assets/icon_delete.png"))
+            delete_button = customtkinter.CTkButton(
+                self, 
+                image=delete_image, 
+                text="", 
+                command=lambda index=i: self.on_delete(index), 
+                width=20, 
+                fg_color="white", 
+                hover_color="gray", 
+                border_color="gray", 
+                border_width=2
+            )
+            delete_button.grid(row=i, column=1, padx=(0, 4))
