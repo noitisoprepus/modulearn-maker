@@ -1,5 +1,8 @@
+import os
+import re
+import shutil
 import customtkinter
-from tkinter import StringVar
+from tkinter import StringVar, filedialog
 from ui.section_editor import SectionListFrame
 from ui.quiz_editor import QuizListFrame
 from PIL import Image
@@ -10,7 +13,8 @@ class MainFrame(customtkinter.CTkFrame):
         self.app = app
 
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(4, weight=1)
+        # TODO: This is a hack. Refactor the frames
+        self.grid_rowconfigure(10, weight=1)
 
         self.label = customtkinter.CTkLabel(self, text="Editor")
         self.label.grid(row=0, column=0, columnspan=2, sticky="ew")
@@ -79,6 +83,49 @@ class MainFrame(customtkinter.CTkFrame):
         add_topic_button.grid(row=0, column=0, padx=8)
         add_quiz_button = customtkinter.CTkButton(button_row, text="Add Quiz", command=add_quiz_button_pressed)
         add_quiz_button.grid(row=0, column=1, padx=8)
+
+        # Optional Image
+        customtkinter.CTkLabel(self, text="Cover Image").grid(row=4, column=0, sticky="w", padx=4, pady=(4, 0))
+        self.preview_label = customtkinter.CTkLabel(self, text="No image selected", anchor="center")
+        self.preview_label.grid(row=5, column=0, columnspan=2, pady=4)
+
+        # Image Selection
+        def choose_image():
+            file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png *.jpg *.jpeg *.webp")])
+            if not file_path:
+                return
+
+            media_dir = self.media_dir or os.path.join(self.app.temp_dir, "media")
+            os.makedirs(media_dir, exist_ok=True)
+            self.app.media_dir = media_dir
+
+            orig = os.path.basename(file_path)
+            name, ext = os.path.splitext(orig)
+            safe = re.sub(r'[^a-zA-Z0-9_-]', '_', name).lower()
+            dest = os.path.join(media_dir, safe + ext.lower())
+            shutil.copy(file_path, dest)
+
+            self.app.modules[module_index]["imgSrc"] = safe + ext.lower()
+            self.on_update()
+            load_preview(dest)
+
+        # Image preview
+        def load_preview(path):
+            try:
+                img = Image.open(path)
+                img.thumbnail((256,256))
+                self.tk_image = customtkinter.CTkImage(light_image=img, size=img.size)
+                self.preview_label.configure(image=self.tk_image, text="")
+            except Exception as e:
+                self.preview_label.configure(text=f"Error loading image:\n{e}", image="")
+
+        if self.app.modules[module_index].get("imgSrc"):
+            abs_path = os.path.join(self.app.temp_dir, "media", self.app.modules[module_index]["imgSrc"])
+            if os.path.exists(abs_path):
+                load_preview(abs_path)
+
+        # Upload Image button
+        customtkinter.CTkButton(self, text="Upload Image", command=choose_image).grid(row=6, column=0, columnspan=2)
 
     def show_topic_editor(self, module_index, topic_index):
         self.clear()
@@ -158,7 +205,7 @@ class MainFrame(customtkinter.CTkFrame):
 
         # Render frame for showing list of sections
         section_frame = SectionListFrame(self, section_list, self.app, on_delete=delete_section)
-        section_frame.grid(row=4, column=0, padx=10, pady=10, columnspan=2, sticky="nsew")
+        section_frame.grid(row=10, column=0, padx=10, pady=10, columnspan=2, sticky="nsew")
 
     def show_quiz_editor(self, module_index):
         self.clear()
@@ -203,4 +250,4 @@ class MainFrame(customtkinter.CTkFrame):
 
         # Render frame for showing list of sections
         quiz_frame = QuizListFrame(self, assessment_list, self.app, on_delete=delete_question)
-        quiz_frame.grid(row=4, column=0, padx=10, pady=10, columnspan=2, sticky="nsew")
+        quiz_frame.grid(row=10, column=0, padx=10, pady=10, columnspan=2, sticky="nsew")

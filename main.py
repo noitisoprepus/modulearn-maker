@@ -160,12 +160,17 @@ class App(customtkinter.CTk):
                 self.sidebar_frame.module_tree.insert(module_id, "end", text="Quiz", tags=("quiz"))
 
     def add_module(self):
-        new_module = {"title": f"Untitled Module {len(self.modules)}", "topics": []}
+        new_module = {"id": f"{len(self.modules)}","title": f"Untitled Module {len(self.modules)}", "imgSrc": None, "topics": []}
         self.modules.append(new_module)
         self.load_modules(self.modules)
 
     def delete_module(self, module_index):
         del self.modules[module_index]
+
+        # Reassign module IDs based on new index
+        for i, module in enumerate(self.modules):
+            module["id"] = str(i)
+
         self.load_modules(self.modules)
     
     def add_topic(self, module_index):
