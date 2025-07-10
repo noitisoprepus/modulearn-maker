@@ -22,7 +22,7 @@ class SidebarFrame(customtkinter.CTkFrame):
         tree_container.grid_columnconfigure(0, weight=1)
 
         # Treeview widget
-        self.module_tree = ttk.Treeview(tree_container)
+        self.module_tree = ttk.Treeview(tree_container, show="tree")
         self.module_tree.grid(row=0, column=0, sticky="nsew")
         self.module_tree.bind("<<TreeviewSelect>>", self.on_select)
 
