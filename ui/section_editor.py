@@ -145,8 +145,8 @@ class SectionListFrame(customtkinter.CTkScrollableFrame):
         self.render_sections()
 
     def render_sections(self):
-        for w in self.winfo_children():
-            w.destroy()
+        for widget in self.winfo_children():
+            widget.destroy()
 
         for i, section in enumerate(self.section_list):
             # Editor Fields

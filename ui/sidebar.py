@@ -40,5 +40,10 @@ class SidebarFrame(customtkinter.CTkFrame):
             self.app.main_frame.show_module_editor(index)
         else:
             module_index = self.module_tree.index(parent)
-            topic_index = self.module_tree.index(item)
-            self.app.main_frame.show_topic_editor(module_index, topic_index)
+            item_text = self.module_tree.item(item, "text")
+
+            if item_text == "Quiz":
+                self.app.main_frame.show_quiz_editor(module_index)
+            else:
+                topic_index = self.module_tree.index(item)
+                self.app.main_frame.show_topic_editor(module_index, topic_index)

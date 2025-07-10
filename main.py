@@ -145,8 +145,14 @@ class App(customtkinter.CTk):
         self.sidebar_frame.module_tree.delete(*self.sidebar_frame.module_tree.get_children())
         for i, module in enumerate(modules):
             module_id = self.sidebar_frame.module_tree.insert("", "end", text=module["title"], open=True)
+            
+            # Load Topics
             for topic in module.get("topics", []):
                 self.sidebar_frame.module_tree.insert(module_id, "end", text=topic["title"])
+            
+            # Load Quiz
+            if "assessment" in module:
+                self.sidebar_frame.module_tree.insert(module_id, "end", text="Quiz", tags=("quiz"))
 
     def add_module(self):
         new_module = {"title": f"Untitled Module {len(self.modules)}", "topics": []}
@@ -154,17 +160,31 @@ class App(customtkinter.CTk):
         self.load_modules(self.modules)
 
     def delete_module(self, module_index):
-            del self.modules[module_index]
-            self.load_modules(self.modules)
+        del self.modules[module_index]
+        self.load_modules(self.modules)
     
     def add_topic(self, module_index):
-            module = self.modules[module_index]
-            module.setdefault("topics", []).append({"title": f"Topic {len(module['topics'])}", "sections": []})
-            self.load_modules(self.modules)
+        module = self.modules[module_index]
+        module.setdefault("topics", []).append({"title": f"Topic {len(module['topics'])}", "sections": []})
+        self.load_modules(self.modules)
 
     def delete_topic(self, module_index, topic_index):
         del self.modules[module_index]["topics"][topic_index]
         self.load_modules(self.modules)
+    
+    def add_quiz(self, module_index):
+        module = self.modules[module_index]
+        if "assessment" not in module:
+            module["assessment"] = []
+            self.load_modules(self.modules)
+        else:
+            messagebox.showinfo("Warning", "Only one Quiz can be added per Module")
+
+    def delete_quiz(self, module_index):
+        module = self.modules[module_index]
+        if "assessment" in module:
+            del module["assessment"]
+            self.load_modules(self.modules)
 
 if __name__ == "__main__":
     app = App()
