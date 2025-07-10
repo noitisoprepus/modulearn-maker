@@ -126,7 +126,7 @@ class QuizListFrame(customtkinter.CTkScrollableFrame):
             editor.grid(row=i, column=0, sticky="ew", padx=8, pady=(8, 0))
 
             # Delete Buttons
-            delete_image = customtkinter.CTkImage(light_image=Image.open("assets/icon_delete.png"))
+            delete_image = customtkinter.CTkImage(light_image=Image.open(self.app.resource_path("assets/icon_delete.png")))
             delete_button = customtkinter.CTkButton(
                 self, 
                 image=delete_image, 

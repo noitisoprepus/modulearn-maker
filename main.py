@@ -1,4 +1,4 @@
-import os
+import sys, os
 import json
 import tempfile
 import zipfile
@@ -141,6 +141,10 @@ class App(customtkinter.CTk):
             finally:
                 self.temp_dir = None
     
+    def resource_path(self, relative_path):
+        base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+        return os.path.join(base_path, relative_path)
+
     def load_modules(self, modules):
         self.sidebar_frame.module_tree.delete(*self.sidebar_frame.module_tree.get_children())
         for i, module in enumerate(modules):

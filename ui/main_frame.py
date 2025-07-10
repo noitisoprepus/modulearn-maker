@@ -46,7 +46,7 @@ class MainFrame(customtkinter.CTkFrame):
             self.clear()
         
         # Delete Button
-        delete_image = customtkinter.CTkImage(light_image=Image.open("assets/icon_delete.png"))
+        delete_image = customtkinter.CTkImage(light_image=Image.open(self.app.resource_path("assets/icon_delete.png")))
         delete_button = customtkinter.CTkButton(
             self, 
             image=delete_image, 
@@ -102,7 +102,7 @@ class MainFrame(customtkinter.CTkFrame):
             self.show_module_editor(module_index=module_index)
         
         # Delete Button
-        delete_image = customtkinter.CTkImage(light_image=Image.open("assets/icon_delete.png"))
+        delete_image = customtkinter.CTkImage(light_image=Image.open(self.app.resource_path("assets/icon_delete.png")))
         delete_button = customtkinter.CTkButton(
             self, 
             image=delete_image, 
@@ -170,7 +170,7 @@ class MainFrame(customtkinter.CTkFrame):
             self.show_module_editor(module_index=module_index)
         
         # Delete Button
-        delete_image = customtkinter.CTkImage(light_image=Image.open("assets/icon_delete.png"))
+        delete_image = customtkinter.CTkImage(light_image=Image.open(self.app.resource_path("assets/icon_delete.png")))
         delete_button = customtkinter.CTkButton(
             self, 
             image=delete_image, 
