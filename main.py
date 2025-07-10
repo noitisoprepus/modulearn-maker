@@ -16,6 +16,7 @@ class App(customtkinter.CTk):
         self.title("ModuLearn Maker")
         self.geometry("1024x640")
         self.protocol("WM_DELETE_WINDOW", self.on_close)
+        customtkinter.set_appearance_mode("light")
 
         self.grid_columnconfigure(4, weight=1)
         self.grid_rowconfigure(1, weight=1)
