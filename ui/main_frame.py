@@ -85,7 +85,7 @@ class MainFrame(customtkinter.CTkFrame):
         add_quiz_button.grid(row=0, column=1, padx=8)
 
         # Optional Image
-        customtkinter.CTkLabel(self, text="Cover Image").grid(row=4, column=0, sticky="w", padx=4, pady=(4, 0))
+        customtkinter.CTkLabel(self, text="Cover Image").grid(row=4, column=0, columnspan=2, pady=(4, 0))
         self.preview_label = customtkinter.CTkLabel(self, text="No image selected", anchor="center")
         self.preview_label.grid(row=5, column=0, columnspan=2, pady=4)
 
@@ -95,7 +95,7 @@ class MainFrame(customtkinter.CTkFrame):
             if not file_path:
                 return
 
-            media_dir = self.media_dir or os.path.join(self.app.temp_dir, "media")
+            media_dir = self.app.media_dir or os.path.join(self.app.temp_dir, "media")
             os.makedirs(media_dir, exist_ok=True)
             self.app.media_dir = media_dir
 
@@ -106,7 +106,6 @@ class MainFrame(customtkinter.CTkFrame):
             shutil.copy(file_path, dest)
 
             self.app.modules[module_index]["imgSrc"] = safe + ext.lower()
-            self.on_update()
             load_preview(dest)
 
         # Image preview
