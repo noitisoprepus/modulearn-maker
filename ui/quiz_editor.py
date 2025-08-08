@@ -64,20 +64,32 @@ class QuizQuestionEditorFrame(customtkinter.CTkFrame):
         # Upload Image button
         customtkinter.CTkButton(self, text="Upload Image", command=choose_image).grid(row=3, column=0, columnspan=2)
 
+        # Image Caption
+        customtkinter.CTkLabel(self, text="(Optional) Caption").grid(row=4, column=0, padx=4, pady=(4, 0), sticky="w")
+        caption_var = StringVar(value=self.question_data.get("caption", ""))
+        caption_entry = customtkinter.CTkEntry(self, textvariable=caption_var)
+        caption_entry.grid(row=5, column=0, columnspan=2, sticky="ew", padx=4, pady=(0, 4))
+
+        def update_caption():
+            self.question_data["caption"] = caption_var.get()
+            self.on_update()
+
+        caption_entry.bind("<KeyRelease>", lambda _: update_caption())
+
         # Question
-        customtkinter.CTkLabel(self, text="Question").grid(row=4, column=0, sticky="w", padx=4, pady=(4, 0))
+        customtkinter.CTkLabel(self, text="Question").grid(row=6, column=0, sticky="w", padx=4, pady=(4, 0))
         question_var = StringVar(value=self.question_data.get("question", ""))
         question_entry = customtkinter.CTkEntry(self, textvariable=question_var)
-        question_entry.grid(row=5, column=0, columnspan=2, padx=4, sticky="ew")
+        question_entry.grid(row=7, column=0, columnspan=2, padx=4, sticky="ew")
 
         # Choices
         choices = ["A", "B", "C", "D"]
         self.choice_vars = {}
         for i, letter in enumerate(choices):
-            customtkinter.CTkLabel(self, text=f"{letter}").grid(row=6+i, column=0, padx=4, pady=(4, 0), sticky="e")
+            customtkinter.CTkLabel(self, text=f"{letter}").grid(row=8+i, column=0, padx=4, pady=(4, 0), sticky="e")
             var = StringVar(value=self.question_data.get("choices", {}).get(letter, ""))
             entry = customtkinter.CTkEntry(self, textvariable=var)
-            entry.grid(row=6+i, column=1, padx=4, sticky="ew")
+            entry.grid(row=8+i, column=1, padx=4, sticky="ew")
             self.choice_vars[letter] = var
 
         def update_question():
@@ -95,10 +107,10 @@ class QuizQuestionEditorFrame(customtkinter.CTkFrame):
             self.on_update()
         
         # Correct Answer
-        customtkinter.CTkLabel(self, text="Answer").grid(row=10, column=0, padx=4, pady=(4, 0), sticky="e")
+        customtkinter.CTkLabel(self, text="Answer").grid(row=(8+len(choices)), column=0, padx=4, pady=(4, 0), sticky="e")
         answer_var = StringVar(value=self.question_data.get("answer", ""))
         answer_dropdown = customtkinter.CTkOptionMenu(self, values=choices, variable=answer_var, command=update_answer)
-        answer_dropdown.grid(row=10, column=1, padx=4, sticky="ew")
+        answer_dropdown.grid(row=(8+len(choices)), column=1, padx=4, sticky="ew")
 
 class QuizListFrame(customtkinter.CTkScrollableFrame):
     def __init__(self, master, assessment_list, app, on_update=None, on_delete=None):
