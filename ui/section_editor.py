@@ -22,34 +22,49 @@ class SectionEditorFrame(customtkinter.CTkFrame):
 
         section_type = self.section_data.get("type", "content")
         if section_type == "text":
-            self.build_text_editor("Content", 300)
+            self.build_text_editor("Text", 150, show_header=True)
         elif section_type == "image":
             self.build_image_editor()
         elif section_type in ("trivia", "remember"):
-            self.build_text_editor(section_type.capitalize(), 150)
+            self.build_text_editor(section_type.capitalize(), 50)
         elif section_type == "active-recall":
             self.build_qna_editor()
         else:
             self.build_text_editor("Unknown", 0)
 
-    def build_text_editor(self, label_text, height):
-        label = customtkinter.CTkLabel(self, text=label_text)
-        label.grid(row=0, column=0, padx=4, pady=(4, 0), sticky="w")
+    def build_text_editor(self, label_text, height, show_header=False):
+        # Label
+        customtkinter.CTkLabel(self, text=label_text.upper(), text_color="green").grid(row=0, column=0, padx=4, pady=(4, 0), sticky="w")
 
+        # Header
+        if (show_header):
+            customtkinter.CTkLabel(self, text="(Optional) Header").grid(row=1, column=0, sticky="w", padx=4, pady=(4, 0))
+            header_var = StringVar(value=self.section_data.get("header", ""))
+            header_entry = customtkinter.CTkEntry(self, textvariable=header_var)
+            header_entry.grid(row=2, column=0, padx=4, sticky="ew")
+
+            def update_header():
+                self.section_data["header"] = header_var.get()
+                self.on_update()
+
+            header_entry.bind("<KeyRelease>", lambda _: update_header())
+
+        # Text Content
+        customtkinter.CTkLabel(self, text="Content").grid(row=3, column=0, sticky="w", padx=4, pady=(4, 0))
         content_var = StringVar(value=self.section_data.get("content", ""))
+        content_entry = customtkinter.CTkTextbox(self, height=height)
+        content_entry.insert("1.0", content_var.get())
+        content_entry.grid(row=4, column=0, sticky="nsew", padx=4, pady=(0, 4))
 
-        entry = customtkinter.CTkTextbox(self, height=height)
-        entry.insert("1.0", content_var.get())
-        entry.grid(row=1, column=0, sticky="nsew", padx=4, pady=(0, 4))
-
-        def on_change(_=None):
-            self.section_data["content"] = entry.get("1.0", "end-1c")
+        def update_content():
+            self.section_data["content"] = content_entry.get("1.0", "end-1c")
             self.on_update()
-
-        entry.bind("<KeyRelease>", on_change)
+        
+        content_entry.bind("<KeyRelease>", lambda _: update_content())
 
     def build_qna_editor(self):
-        customtkinter.CTkLabel(self, text="Active Recall").grid(row=0, column=0, sticky="w", padx=4, pady=(4, 0))
+        # Label
+        customtkinter.CTkLabel(self, text="ACTIVE RECALL", text_color="green").grid(row=0, column=0, sticky="w", padx=4, pady=(4, 0))
 
         # Question
         question_var = StringVar(value=self.section_data.get("question", ""))
@@ -73,7 +88,9 @@ class SectionEditorFrame(customtkinter.CTkFrame):
 
     def build_image_editor(self):
         # Label
-        customtkinter.CTkLabel(self, text="Image").grid(row=0, column=0, sticky="w", padx=4, pady=(4, 0))
+        customtkinter.CTkLabel(self, text="IMAGE", text_color="green").grid(row=0, column=0, sticky="w", padx=4, pady=(4, 0))
+
+        # Preview Image Label
         self.preview_label = customtkinter.CTkLabel(self, text="No image selected", anchor="center")
         self.preview_label.grid(row=1, column=0, pady=4)
 
@@ -115,8 +132,8 @@ class SectionEditorFrame(customtkinter.CTkFrame):
         # Upload Image button
         customtkinter.CTkButton(self, text="Upload Image", command=choose_image).grid(row=2, column=0)
         
-        # Caption
-        customtkinter.CTkLabel(self, text="Caption").grid(row=3, column=0, padx=4, pady=(4, 0), sticky="w")
+        # Image Caption
+        customtkinter.CTkLabel(self, text="(Optional) Caption").grid(row=3, column=0, padx=4, pady=(4, 0), sticky="w")
         caption_var = StringVar(value=self.section_data.get("caption", ""))
         caption_entry = customtkinter.CTkEntry(self, textvariable=caption_var)
         caption_entry.grid(row=4, column=0, sticky="ew", padx=4, pady=(0, 4))
