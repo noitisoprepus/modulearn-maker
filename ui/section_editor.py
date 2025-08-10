@@ -2,7 +2,7 @@ import os
 import re
 import shutil
 import customtkinter
-from tkinter import StringVar, filedialog
+from tkinter import StringVar, BooleanVar, filedialog
 from PIL import Image
 
 class SectionEditorFrame(customtkinter.CTkFrame):
@@ -23,6 +23,8 @@ class SectionEditorFrame(customtkinter.CTkFrame):
         section_type = self.section_data.get("type", "content")
         if section_type == "text":
             self.build_text_editor("Text", 150, show_header=True)
+        elif section_type == "list":
+            self.build_list_editor()
         elif section_type == "image":
             self.build_image_editor()
         elif section_type in ("trivia", "remember"):
@@ -52,7 +54,7 @@ class SectionEditorFrame(customtkinter.CTkFrame):
         # Text Content
         customtkinter.CTkLabel(self, text="Content").grid(row=3, column=0, sticky="w", padx=4, pady=(4, 0))
         content_var = StringVar(value=self.section_data.get("content", ""))
-        content_entry = customtkinter.CTkTextbox(self, height=height)
+        content_entry = customtkinter.CTkTextbox(self, wrap="word", height=height)
         content_entry.insert("1.0", content_var.get())
         content_entry.grid(row=4, column=0, sticky="nsew", padx=4, pady=(0, 4))
 
@@ -61,6 +63,81 @@ class SectionEditorFrame(customtkinter.CTkFrame):
             self.on_update()
         
         content_entry.bind("<KeyRelease>", lambda _: update_content())
+
+    def build_list_editor(self):
+        # Clear existing widgets before re-rendering
+        for widget in self.winfo_children():
+            widget.destroy()
+            
+        # Label
+        customtkinter.CTkLabel(self, text="LIST", text_color="green").grid(row=0, column=0, padx=4, pady=(4, 0), sticky="w")
+
+        categories = ["unordered", "ordered"]
+        entry_list = self.section_data.get("entries", [""])
+
+        def add_entry():
+            entry_list.append("")
+            self.section_data["entries"] = entry_list
+            self.build_list_editor()
+
+        def delete_entry(index):
+            del entry_list[index]
+            self.section_data["entries"] = entry_list
+            self.build_list_editor()
+
+        def update_category(choice):
+            self.section_data["category"] = choice
+
+        def update_entry_text(index, text):
+            entry_list[index] = text
+            self.section_data["entries"] = entry_list
+
+        # Create a sub-frame for the dropdown and button
+        button_row = customtkinter.CTkFrame(self, fg_color="transparent")
+        button_row.grid(row=1, column=0, columnspan=2, pady=4, sticky="w")
+
+        # Category dropdown
+        category_var = StringVar(value=self.section_data.get("category", "unordered"))
+        category_dropdown = customtkinter.CTkOptionMenu(button_row, values=categories, variable=category_var, command=update_category)
+        category_dropdown.grid(row=0, column=0, padx=8, sticky="w")
+
+        # Toggle for hasHeader
+        hasHeader_var = BooleanVar(value=self.section_data.get("hasHeader", False))
+        
+        def toggle_has_header():
+            self.section_data["hasHeader"] = hasHeader_var.get()
+        
+        hasHeader_checkbox = customtkinter.CTkCheckBox(button_row, text="Has Header", variable=hasHeader_var, command=toggle_has_header)
+        hasHeader_checkbox.grid(row=0, column=1, padx=8, sticky="w")
+        
+        # Add entry button
+        add_button = customtkinter.CTkButton(self, text="Add Entry", command=add_entry)
+        add_button.grid(row=2, column=0, padx=8, sticky="w")
+
+        # Entries list
+        for index, value in enumerate(entry_list):
+            entry_frame = customtkinter.CTkFrame(self, fg_color="transparent")
+            entry_frame.grid(row=3 + index, column=0, columnspan=2, pady=2, sticky="ew")
+            entry_frame.grid_columnconfigure(0, weight=1)
+            entry_frame.grid_columnconfigure(1, weight=0)
+
+            # Text entry for list item
+            entry_content = customtkinter.CTkTextbox(entry_frame, wrap="word", height=80)
+            entry_content.insert("1.0", value)
+            entry_content.grid(row=0, column=0, padx=4, sticky="ew")
+
+            # Update on key release
+            def bind_textbox(widget, index):
+                def on_change(event):
+                    entry_value = widget.get("1.0", "end-1c")  # Remove trailing newline
+                    entry_list[index] = entry_value
+                    self.section_data["entries"] = entry_list
+                widget.bind("<KeyRelease>", on_change)
+            bind_textbox(entry_content, index)
+            
+            # Delete button
+            delete_button = customtkinter.CTkButton(entry_frame, text="Remove", width=60, command=lambda i=index: delete_entry(i))
+            delete_button.grid(row=0, column=1, padx=4, sticky="e")
 
     def build_qna_editor(self):
         # Label
