@@ -215,11 +215,22 @@ class SectionEditorFrame(customtkinter.CTkFrame):
         caption_entry = customtkinter.CTkEntry(self, textvariable=caption_var)
         caption_entry.grid(row=4, column=0, sticky="ew", padx=4, pady=(0, 4))
 
+        # Image Attribution
+        customtkinter.CTkLabel(self, text="(Optional) Attribution").grid(row=5, column=0, padx=4, pady=(4, 0), sticky="w")
+        attribution_var = StringVar(value=self.section_data.get("caption", ""))
+        attribution_entry = customtkinter.CTkEntry(self, textvariable=caption_var)
+        attribution_entry.grid(row=6, column=0, sticky="ew", padx=4, pady=(0, 4))
+
         def update_caption():
             self.section_data["caption"] = caption_var.get()
             self.on_update()
 
+        def update_attribution():
+            self.section_data["attribution"] = attribution_var.get()
+            self.on_update()
+
         caption_entry.bind("<KeyRelease>", lambda _: update_caption())
+        attribution_entry.bind("<KeyRelease>", lambda _: update_attribution())
 
 class SectionListFrame(customtkinter.CTkScrollableFrame):
     """Scrollable container of SectionEditorFrames"""

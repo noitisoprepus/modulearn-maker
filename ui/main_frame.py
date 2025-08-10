@@ -173,13 +173,15 @@ class MainFrame(customtkinter.CTkFrame):
         def add_section():
             section_data = {"type": section_type.get()}
             if section_type.get() == "image":
-                section_data.update({"imgSrc": None, "caption": ""})
+                section_data.update({"imgSrc": None, "caption": "", "attribution": ""})
             elif section_type.get() == "active-recall":
                 section_data.update({"question": "", "answer": ""})
             elif section_type.get() == "list":
                 section_data.update({"category": "unordered", "hasHeader": False, "entries": [""]})
+            elif section_type.get() == "text":
+                section_data.update({"header": "","content": ""})
             else:
-                section_data.update({"header": "", "content": ""})
+                section_data.update({"content": ""})
 
             section_list.append(section_data)
             self.show_topic_editor(module_index, topic_index)
@@ -237,7 +239,8 @@ class MainFrame(customtkinter.CTkFrame):
                 "choices": {"a": "", "b": "", "c": "", "d": ""},
                 "answer": "",
                 "imgSrc": None,
-                "caption": ""
+                "caption": "",
+                "attribution": ""
             })
             self.show_quiz_editor(module_index)
 
